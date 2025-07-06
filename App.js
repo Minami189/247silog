@@ -3,9 +3,9 @@ import { Image, View, Text, StyleSheet, ScrollView, FlatList, TouchableOpacity, 
 import Item from "./Item.js";
 import itemList from "./ItemsList.js";
 import Orders from "./orders.js";
+import History from "./history.js";
+
 export default function App() {
-
-
   const [lifetimeOrders, setLifetimeOrders] = useState(1)
   const [ordered, setOrdered] = useState([]);
   const [orders, setOrders] = useState([]);
@@ -15,7 +15,7 @@ export default function App() {
   const [items, setItems] = useState(itemList);
   const [filtering, setFiltering] = useState("all");
   const [editedOrderNo, setEditedOrderNo] = useState(null);
-
+  const [state, setState] = useState("home");
 
   function itemClick(name, price) {
     setOrdered((prev) => {
@@ -41,7 +41,6 @@ export default function App() {
     setTotalPrice(prev=>prev+price)
   }
 
-
   function resetOrder(){
     setOrdered([])
     setTotalPrice(0)
@@ -54,8 +53,9 @@ export default function App() {
       return;
     }
 
-    if (editedOrderNo !== null) {
+    if (editedOrderNo !== null && editedOrderNo === orderNo) {
       // Editing an existing order
+      
       setOrders(prev =>
         prev.map(order =>
           order.orderNo === editedOrderNo ? { ...order, items: ordered, totalPrice } : order
@@ -80,7 +80,7 @@ export default function App() {
     }
 
     
-
+    console.log("confirmed order: " + ordered);
     setOrdered([]);
     setTotalPrice(0);
     setEditedOrderNo(null);
@@ -134,7 +134,12 @@ function decreaseOrder(index) {
     }
   
   }
-  
+  if(state == "history"){
+    return(
+      <History setState={setState}></History>
+    )
+  }
+  if(state == "home"){
   return (
     <View style={styles.wrapper}>
       <Modal
@@ -147,20 +152,22 @@ function decreaseOrder(index) {
           <Pressable style={styles.backdrop} onPress={() => setVisible(false)} />
 
           <View style={styles.modalContent}>
-            <Orders visible={visible} setVisible={setVisible} orders={orders} setOrders={setOrders} ordered={ordered} setOrdered={setOrdered} setOrderNo={setOrderNo} setTotalPrice={setTotalPrice} setEditedOrderNo={setEditedOrderNo}/>
+            <Orders visible={visible} setVisible={setVisible} orders={orders} setOrders={setOrders} ordered={ordered} setOrdered={setOrdered} setOrderNo={setOrderNo} setTotalPrice={setTotalPrice} setEditedOrderNo={setEditedOrderNo} lifetimeOrders={lifetimeOrders}/>
           </View>
         </View>
       </Modal>
 
 
       <View style={styles.left}>
+        
         <View style={styles.filterbar}>
           <TouchableOpacity onPress={()=>filter("all")}><Text style={filtering=="all" ? styles.filterSelected : styles.filterText }>All</Text></TouchableOpacity>
           <TouchableOpacity onPress={()=>filter("meal")}><Text style={filtering=="meal" ? styles.filterSelected : styles.filterText}>Meals</Text></TouchableOpacity>
           <TouchableOpacity onPress={()=>filter("drinks")}><Text style={filtering=="drinks" ? styles.filterSelected : styles.filterText}>Drinks</Text></TouchableOpacity>
           <TouchableOpacity onPress={()=>filter("extras")}><Text style={ filtering=="extras" ? styles.filterSelected : styles.filterText}>Extras</Text></TouchableOpacity>
         </View>
-
+        
+        
         <FlatList
           data={items}
           keyExtractor={(item, index) => index.toString()}
@@ -188,8 +195,11 @@ function decreaseOrder(index) {
       <View style={styles.right}>
         <View style={styles.overallWrapper}>
         <View style={styles.header}>
-          <Text style={styles.headerText}>Order #{orderNo}</Text>
-
+          <View style={{flexDirection: "column", justifyContent: "center", alignItems: "center"}}>
+            <TouchableOpacity onPress={()=>setState("history")}><Text style={{fontSize: 50}}>📅</Text></TouchableOpacity>
+            <Text style={styles.headerText}>Order #{orderNo}</Text>
+          </View>
+          
           <TouchableOpacity onPress={seeOrders}><View style={styles.ordersButton}><Text style={styles.buttonText}>See Orders</Text></View></TouchableOpacity>
         </View>
         <View style={styles.separator}/>
@@ -242,7 +252,8 @@ function decreaseOrder(index) {
       </View>
       
     </View>
-  );
+  )};
+  
 }
 
 const styles = StyleSheet.create({

@@ -7,10 +7,42 @@ import {
   FlatList,
   ScrollView,
 } from "react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
+export default function Orders({ visible, setVisible, orders, setOrders, ordered, setOrdered, setTotalPrice, setOrderNo, setEditedOrderNo, lifetimeOrders }) {
+    async function readData() {
+      try {
+        const value = await AsyncStorage.getItem('orders');
+        if (value !== null) {
+          console.log("read item: " + value);
+          const parsed = JSON.parse(value);
+          // Always return an array
+          return Array.isArray(parsed) ? parsed : [parsed];
+        }
+        return []; // Return empty array if nothing stored
+      } catch (e) {
+        console.error("Error reading data", e);
+      }
+    }
+
+    async function storeData(newOrders) {
+      try {
+        const d = new Date();
+        const year = d.getFullYear();
+        const month = (d.getMonth() + 1).toString().padStart(2, '0'); 
+        const day = d.getDate().toString().padStart(2, '0');
+        const formattedDate = `${year}-${month}-${day}`;
+        const prevOrders = await readData();
+        const updatedOrders = prevOrders.concat({...newOrders, date: formattedDate});
+        await AsyncStorage.setItem('orders', JSON.stringify(updatedOrders));
+      } catch (e) {
+        console.error("Error storing data", e);
+      }
+    }
 
 
 
-export default function Orders({ visible, setVisible, orders, setOrders, ordered, setOrdered, setTotalPrice, setOrderNo, setEditedOrderNo }) {
 
     function editOrder(orderIndex) {
         const order = orders[orderIndex];
@@ -21,6 +53,13 @@ export default function Orders({ visible, setVisible, orders, setOrders, ordered
         setEditedOrderNo(order.orderNo)
     }
 
+    function finishOrder(index){
+      setOrders(prev=>prev.filter((p)=>p.orderNo!==orders[index].orderNo))
+      setOrdered([]);
+      setTotalPrice(0);
+      setOrderNo(lifetimeOrders);
+      storeData(orders[index]);
+    }
 
   return (
     <View style={{ width: 1300, height: 750, backgroundColor: "#EDEBDE", borderRadius: 15 }}>
@@ -78,7 +117,7 @@ export default function Orders({ visible, setVisible, orders, setOrders, ordered
                 <Text style={styles.totalTitle}>{item.totalPrice}</Text>
               </View>
               <View style={styles.center}>
-                <TouchableOpacity style={styles.finishButton} onPress={()=>setOrders(prev=>prev.filter((p)=>p.orderNo!==orders[index].orderNo))}>
+                <TouchableOpacity style={styles.finishButton} onPress={()=>finishOrder(index)}>
                   <Text style={styles.finishText}>Finish Order</Text>
                 </TouchableOpacity>
               </View>

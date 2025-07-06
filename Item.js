@@ -15,7 +15,7 @@ const styles = StyleSheet.create({
   itemWrapper: {
     backgroundColor: "#136E9B",
     width: 155,
-    height: 200,
+    height: 220,
     borderRadius: 10,
     flexDirection: "column",
     alignItems: "center",
@@ -29,11 +29,14 @@ const styles = StyleSheet.create({
   },
   itemName: {
     color: "#F2CF10",
-    fontSize: 21,
+    fontSize: 25,
     fontWeight: "bold",
+    textAlign: "center"
   },
   itemPrice: {
     fontWeight: "bold",
-    fontSize: 18,
+    fontSize: 25,
+    color: "white"
+
   },
 });
