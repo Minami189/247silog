@@ -18,7 +18,12 @@
       "android": {
         "buildType": "apk"
       },
-      "distribution": "internal"
+      
+      "distribution": "internal",
+      "developmentClient": false,
+      "env": {
+        "EXPO_NO_MANIFEST_VERIFICATION": "1"
+      }
     }
   },
   "submit": {

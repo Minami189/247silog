@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   ScrollView,
 } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { TextInput } from 'react-native';
 
 
 export default function Orders({ visible, setVisible, orders, setOrders, ordered, setOrdered, setTotalPrice, setOrderNo, setEditedOrderNo, lifetimeOrders }) {
@@ -42,25 +43,141 @@ export default function Orders({ visible, setVisible, orders, setOrders, ordered
     }
 
 
-
+    const [showCalc, setShowCalc] = useState(false);
+    const [selectedOrderIndex, setSelectedOrderIndex] = useState(null);
+    const [moneyGiven, setMoneyGiven] = useState('');
+    const [change, setChange] = useState(null);
 
     function editOrder(orderIndex) {
-        const order = orders[orderIndex];
-        setOrdered(order.items);
-        setTotalPrice(order.totalPrice);
-        setVisible(false);
-        setOrderNo(order.orderNo)
-        setEditedOrderNo(order.orderNo)
+      const order = orders[orderIndex];
+      setOrdered(order.items);
+      setTotalPrice(order.totalPrice);
+      setVisible(false);
+      setOrderNo(order.orderNo)
+      setEditedOrderNo(order.orderNo)
     }
 
     function finishOrder(index){
-      setOrders(prev=>prev.filter((p)=>p.orderNo!==orders[index].orderNo))
-      setOrdered([]);
-      setTotalPrice(0);
-      setOrderNo(lifetimeOrders);
-      storeData(orders[index]);
+      setSelectedOrderIndex(index);
+      setShowCalc(true);
     }
 
+    function confirmPayment() {
+    const order = orders[selectedOrderIndex];
+    const given = parseFloat(moneyGiven);
+    const total = parseFloat(order.totalPrice);
+
+    if (isNaN(given)) {
+      alert("Please enter a valid number.");
+      return;
+    }
+
+    if (given < total) {
+      alert("Insufficient payment.");
+      return;
+    }
+
+    const calcChange = given - total;
+    setChange(calcChange.toFixed(2)); // 2 decimal places
+  }
+
+  function finalizeOrder() {
+    const index = selectedOrderIndex;
+
+    setOrders(prev => prev.filter(p => p.orderNo !== orders[index].orderNo));
+    setOrdered([]);
+    setTotalPrice(0);
+    setOrderNo(lifetimeOrders);
+    storeData(orders[index]);
+
+    // Reset states
+    setShowCalc(false);
+    setSelectedOrderIndex(null);
+    setMoneyGiven('');
+    setChange(null);
+  }
+
+
+  
+
+  if (showCalc) {
+  const order = orders[selectedOrderIndex];
+  return (
+    <View style={styles.calcWrapper}>
+      <Text style={{ fontSize: 40, fontWeight: 'bold', textAlign: "center", color:"white", width:"100%", height: 70, marginTop: 25 }}>
+        Order # {order?.orderNo}
+      </Text>
+      <View style={styles.separator}/>
+      <Text style={{ fontSize: 40, fontWeight: 'bold', textAlign: "center", color:"white"  }}>Total: {order?.totalPrice}</Text>
+
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <Text style={{ fontSize: 18, marginRight: 10 }}>₱</Text>
+        <TextInput
+          style={{
+            borderWidth: 2,
+            padding: 10,
+            width: 450,
+            borderRadius: 8,
+            fontSize: 25,
+            color:"white",
+          }}
+          keyboardType="numeric"
+          value={moneyGiven}
+          onChangeText={setMoneyGiven}
+          autoFocus={true}
+          placeholder="payment amount"
+        />
+      </View>
+      
+      <View style={{height: "15%", gap:25, alignItems:"center"}}> 
+      {change !== null && (
+        <Text style={{ marginTop: 20, fontSize: 30, backgroundColor:"#F5D107", paddingVertical:15, borderRadius:25, paddingHorizontal: 25, fontWeight: "bold" }}>
+          Change: ₱{change}
+        </Text>
+      )}
+
+      {change !== null && (
+              <TouchableOpacity
+                style={[styles.finishButton, { backgroundColor: "#2E7D32" }]}
+                onPress={finalizeOrder}
+              >
+                <Text style={styles.finishText}>Confirm</Text>
+              </TouchableOpacity>
+            )}
+      </View>
+
+
+        <View style={styles.calcButtons}>
+
+          <View style={{flexDirection:"row", justifyContent: "center", alignItems: "center", gap: 25}}>
+            <TouchableOpacity
+              style={styles.finishButton}
+              onPress={confirmPayment}
+            >
+              <Text style={styles.finishText}>Calculate</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.finishButton, { backgroundColor: "gray" }]}
+              onPress={() => {
+                setShowCalc(false);
+                setSelectedOrderIndex(null);
+                setMoneyGiven('');
+                setChange(null);
+              }}
+            >
+              <Text style={styles.finishText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+
+        </View>
+        
+
+      
+    </View>
+  );
+}
+  
   return (
     <View style={{ width: 1300, height: 750, backgroundColor: "#EDEBDE", borderRadius: 15 }}>
 
@@ -127,9 +244,28 @@ export default function Orders({ visible, setVisible, orders, setOrders, ordered
       />
     </View>
   );
+  
 }
 
 const styles = StyleSheet.create({
+  calcButtons: {
+    height: "35%",
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    flexDirection: "column",
+    gap: 35,
+
+  },
+  calcWrapper: {
+    width: 600,
+    height: 750,
+    backgroundColor: "#136E9B",
+    borderRadius: 15,
+    alignItems: "center",
+    padingTop: 100
+  },
+
   center: {
     width: "100%",
     justifyContent: "center",
