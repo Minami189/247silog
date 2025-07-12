@@ -95,6 +95,50 @@ const items = [
       price: 199,
       image: require("./assets/sisigplatter.png")
     },
+
+    {
+      category: "extras",
+      name: "Semangka",
+      price: 10,
+      image: require("./assets/semangka.png")
+    },
+    {
+      category: "extras",
+      name: "Chocolate Balls",
+      price: 25,
+      image: require("./assets/chocballs.png")
+    },
+    {
+      category: "extras",
+      name: "Chocolate crispy",
+      price: 25,
+      image: require("./assets/choccrispy.png")
+    },
+    {
+      category: "extras",
+      name: "milkmelon",
+      price: 12,
+      image: require("./assets/milkmelon.png")
+    },
+    {
+      category: "extras",
+      name: "Cookies & Cream",
+      price: 25,
+      image: require("./assets/cookiesncream.png")
+    },
+    {
+      category: "extras",
+      name: "chocmilk",
+      price: 12,
+      image: require("./assets/chocmilk.png")
+    },
+    {
+      category: "drinks",
+      name: "Bottled Water",
+      price: 20,
+      image: require("./assets/bottledwater.png")
+    },
+    
   ]
 
   export default items;
