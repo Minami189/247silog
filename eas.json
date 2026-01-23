@@ -15,12 +15,13 @@
       "autoIncrement": true
     },
     "apk": {
-      "android": {
-        "buildType": "apk"
-      },
-      
+      "node": "20.18.0",
       "distribution": "internal",
       "developmentClient": false,
+      "android": {
+        "buildType": "apk",
+        "image": "ubuntu-22.04-jdk-17-ndk-r25b"
+      },
       "env": {
         "EXPO_NO_MANIFEST_VERIFICATION": "1"
       }
